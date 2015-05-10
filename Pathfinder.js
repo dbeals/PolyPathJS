@@ -32,13 +32,33 @@ Description: The Pathfinder class, which is used to generate the actual
 ***********************************************************************/
 function Pathfinder() {
 	this.trimPaths = false;
+	
+	function continuesHorizontally(previousPoint, currentPoint, nextPoint) {
+		return currentPoint.y == nextPoint.y && nextPoint.y == previousPoint.y && currentPoint.x != nextPoint.x;
+	}
+	
+	function continuesVertically(previousPoint, currentPoint, nextPoint) {
+		return currentPoint.x == nextPoint.x && nextPoint.x == previousPoint.x && currentPoint.y != nextPoint.y;
+	}
+	
+	function continuesDiagonallyTest(previousPoint, currentPoint, nextPoint, xOffset, yOffset) {
+		return (currentPoint.x + xOffset == nextPoint.x && currentPoint.y + yOffset == nextPoint.y) &&
+			(currentPoint.x + -xOffset == previousPoint.x && currentPoint.y + -yOffset == previousPoint.y);
+	}
+	
+	function continuesDiagonally(previousPoint, currentPoint, nextPoint) {
+		return continuesDiagonallyTest(previousPoint, currentPoint, nextPoint, 1, -1) ||
+			continuesDiagonallyTest(previousPoint, currentPoint, nextPoint, 1, 1) ||
+			continuesDiagonallyTest(previousPoint, currentPoint, nextPoint, -1, 1) ||
+			continuesDiagonallyTest(previousPoint, currentPoint, nextPoint, -1, -1);
+	}
 
 	this.checkNode = function(column, row) {
 		return true;
 	}
 
 	this.createPath = function(node, depth) {
-		var output = new Array();
+		var output = [];
 		var parent = node;
 		while(parent != null) {
 			output.unshift(parent.position);
@@ -47,15 +67,13 @@ function Pathfinder() {
 		depth.value = output.length;
 
 		if(this.trimPaths) {
-			var indicesToRemove = new Array();
+			var indicesToRemove = [];
 			for(var index = 1; index < output.length - 1; ++index) {
 				var previousPoint = output[index - 1];
 				var currentPoint = output[index];
 				var nextPoint = output[index + 1];
 
-				if(
-					(currentPoint.x == nextPoint.x && currentPoint.y != nextPoint.y && nextPoint.x == previousPoint.x) ||
-					(currentPoint.y == nextPoint.y && currentPoint.x != nextPoint.x && nextPoint.y == previousPoint.y))
+				if(continuesHorizontally(previousPoint, currentPoint, nextPoint) || continuesVertically(previousPoint, currentPoint, nextPoint) || continuesDiagonally(previousPoint, currentPoint, nextPoint))
 					indicesToRemove.push(index);
 			}
 
@@ -91,8 +109,8 @@ function Pathfinder() {
 	}
 
 	this.findPath = function(startPosition, endPosition, depth) {
-		var closedNodes = new Array();
-		var openNodes = new Array();
+		var closedNodes = [];
+		var openNodes = [];
 
 		openNodes.push({
 			position: startPosition,

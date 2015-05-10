@@ -66,6 +66,3 @@ There are still a few things that need to be added:
 
 **Weighting**
 The algorithm does not currently incorporate weights.
-
-**Diagonal Pathing Trimming**
-The path trimming currently only cuts out horizontal and vertical nodes; we need to add the ability to cut out diagonal nodes.
