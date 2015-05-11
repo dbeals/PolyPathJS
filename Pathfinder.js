@@ -57,13 +57,37 @@ function Pathfinder() {
 		return true;
 	}
 
-	this.createPath = function(node, depth) {
+	this.createPath = function(node, depth, userData) {
+		if(userData === undefined || userData === null)
+			userData = {};
+		
+		if(userData.popFirstWaypoint === undefined)
+			userData.popFirstWaypoint = false;
+		
+		if(userData.popLastNWaypoints === undefined)
+			userData.popLastNWaypoints = 0;
+		
 		var output = [];
 		var parent = node;
 		while(parent != null) {
 			output.unshift(parent.position);
 			parent = parent.parent;
 		}
+		
+		if(userData != null) {
+			if(userData.popFirstWaypoint)
+				output.shift();
+			
+			if(userData.popLastNWaypoints > 0) {
+				if(userData.popLastNWaypoints > output.length) {
+					depth.value = 0;
+					return [];
+				}
+				
+				output.splice(output.length - userData.popLastNWaypoints, userData.popLastNWaypoints);
+			}
+		}
+		
 		depth.value = output.length;
 
 		if(this.trimPaths) {

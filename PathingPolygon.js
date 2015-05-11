@@ -40,7 +40,7 @@ function PathingPolygon() {
 	this.isClosed = false;
 	this.useTightTests = true;
 
-	this.isPointInsidePolygon = function(points, testX, testY) {
+	function isPointInsidePolygon(points, testX, testY) {
 		var counter = 0;
 		var point1 = points[0];
 		for(var index = 1; index <= points.length; ++index) {
@@ -58,9 +58,9 @@ function PathingPolygon() {
 		return counter % 2 != 0;
 	}
 
-	this.isRectangleInsidePolygon = function(points, node, tightTest) {
-		var leftTopRightBottom = this.isPointInsidePolygon(points, node.x, node.y) && this.isPointInsidePolygon(points, node.x + node.width, node.y + node.height);
-		var rightTopLeftBottom = this.isPointInsidePolygon(points, node.x + node.width, node.y) && this.isPointInsidePolygon(points, node.x, node.y + node.height);
+	function isRectangleInsidePolygon(points, node, tightTest) {
+		var leftTopRightBottom = isPointInsidePolygon(points, node.x, node.y) && isPointInsidePolygon(points, node.x + node.width, node.y + node.height);
+		var rightTopLeftBottom = isPointInsidePolygon(points, node.x + node.width, node.y) && isPointInsidePolygon(points, node.x, node.y + node.height);
 
 		if(tightTest)
 			return leftTopRightBottom && rightTopLeftBottom;
@@ -127,7 +127,7 @@ function PathingPolygon() {
 					column: column,
 					row: row,
 					bounds: nodeBounds,
-					isPathable: this.isRectangleInsidePolygon(this.points, nodeBounds, this.useTightTests),
+					isPathable: isRectangleInsidePolygon(this.points, nodeBounds, this.useTightTests),
 				};
 
 			}
@@ -161,5 +161,28 @@ function PathingPolygon() {
 
 	this.getNodeAtColumnRow = function(column, row) {
 		return this.nodes[(row * this.width) + column];
+	}
+	
+	this.containsColumnRow = function(column, row) {
+		return column >= 0 && column <= this.width && row >= 0 && row <= this.height;
+	}
+	
+	this.debugDraw = function(drawLine, drawNode) {
+		if(drawNode != null && this.isClosed) {
+			for(var index = 0; index < this.nodes.length; ++index) {
+				var node = this.nodes[index];
+				if(!node.isPathable)
+					continue;
+				drawNode(node);
+			}
+		}
+		
+		if(drawLine != null && this.points.length > 1) {
+			for(var index = 0; index < this.points.length - 1; ++index) {
+				var start = this.points[index];
+				var end = this.points[index + 1];
+				drawLine(start, end, index);
+			}
+		}
 	}
 }

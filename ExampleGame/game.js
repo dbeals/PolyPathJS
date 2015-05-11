@@ -12,7 +12,7 @@ var playerPoint = null;
 var playerDestination = null;
 var playerPath = null;
 
-pathfinder.checkNode = function(column, row) {
+pathfinder.checkNode = function(column, row, userData) {
 	var node = pathingPolygon.nodes[(row * pathingPolygon.width) + column];
 	return node != null && node.isPathable;
 }
@@ -72,25 +72,18 @@ function update(delta) {}
 function draw() {
 	graphics.clear();
 
-	for(var row = 0; row < pathingPolygon.height; ++row) {
-		for(var column = 0; column < pathingPolygon.width; ++column) {
-			var node = pathingPolygon.nodes[(row * pathingPolygon.width) + column];
-			if(node.isPathable)
-				graphics.drawRectangle(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, "#ffffff", 1);
-		}
-	}
-
-	for(var index = 0; index < pathingPolygon.points.length; ++index) {
-		if(index + 1 >= pathingPolygon.points.length)
-			break;
-
-		var point1 = pathingPolygon.points[index];
-		var point2 = pathingPolygon.points[index + 1];
-		if(index == 0)
-			graphics.fillRectangle(point1.x - 4, point1.y - 4, 8, 8, "#800000");
-		graphics.fillRectangle(point2.x - 4, point2.y - 4, 8, 8, "#800000");
-		graphics.drawLine(point1.x, point1.y, point2.x, point2.y, "#ff0000", 1);
-	}
+	var boxColor = "#800000";
+	var lineColor = "#ff0000";
+	pathingPolygon.debugDraw(
+		function (start, end, index) {
+			if(index == 0)
+				graphics.fillRectangle(start.x - 4, start.y - 4, 8, 8, boxColor);
+			graphics.fillRectangle(end.x - 4, end.y - 4, 8, 8, boxColor);
+			graphics.drawLine(start.x, start.y, end.x, end.y, lineColor, 1);
+		},
+		function (node) {
+			graphics.drawRectangle(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, "#ffffff", 1);
+		});
 
 	if(playerPoint != null) {
 		var node = pathingPolygon.nodes[(playerPoint.y * pathingPolygon.width) + playerPoint.x];
@@ -102,19 +95,14 @@ function draw() {
 		graphics.fillRectangle(node.bounds.x, node.bounds.y, node.bounds.width, node.bounds.height, "#ff0000");
 	}
 
+	boxColor = "#ffff00";
+	lineColor = "#00ff00";
 	if(playerPath != null) {
-		for(var index = 1; index < playerPath.waypoints.length; ++index) {
-			var startPoint = playerPath.waypoints[index - 1];
-			var endPoint = playerPath.waypoints[index];
-
-			var startPointArea = new Rectangle(startPoint.x - 4, startPoint.y - 4, 8, 8);
-			var endPointArea = new Rectangle(endPoint.x - 4, endPoint.y - 4, 8, 8);
-
-			if(index == 1)
-				graphics.fillRectangle(startPointArea.x, startPointArea.y, startPointArea.width, startPointArea.height, "#ffff00");
-
-			graphics.fillRectangle(endPointArea.x, endPointArea.y, endPointArea.width, endPointArea.height, "#ffff00");
-			graphics.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, "#00ff00", 1);
-		}
+		playerPath.debugDraw(function (start, end, index) {
+			if(index == 0)
+				graphics.fillRectangle(start.x - 4, start.y - 4, 8, 8, boxColor);
+			graphics.fillRectangle(end.x - 4, end.y - 4, 8, 8, boxColor);
+			graphics.drawLine(start.x, start.y, end.x, end.y, lineColor, 1);
+		});
 	}
 }

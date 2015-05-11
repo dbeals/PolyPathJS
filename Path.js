@@ -99,4 +99,15 @@ function Path() {
 	this.clear = function() {
 		this.waypoints.length = 0;
 	}
+	
+	this.debugDraw = function(drawLine) {
+		if(drawLine == null)
+			return;
+		
+		for(var index = 0; index < this.waypoints.length - 1; ++index) {
+			var current = this.waypoints[index];
+			var next = this.waypoints[index + 1];
+			drawLine(current, next, index);
+		}
+	}
 }
