@@ -75,6 +75,15 @@ function Pathfinder() {
 		}
 		
 		if(userData != null) {
+			var poppingWaypoints = false;
+			for(var index = output.length - 1; index >= 0; --index) {
+				poppingWaypoints = userData.popWaypointTest(output[index], index);
+				if(!poppingWaypoints)
+					break;
+				
+				output.splice(-1, 1);
+			}
+			
 			if(userData.popFirstWaypoint)
 				output.shift();
 			
